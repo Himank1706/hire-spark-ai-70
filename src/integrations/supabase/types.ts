@@ -14,7 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          full_name: string | null
+          headline: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          headline?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          full_name?: string | null
+          headline?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      resumes: {
+        Row: {
+          ats_score: number | null
+          created_at: string
+          education: Json | null
+          experience: Json | null
+          file_name: string
+          file_path: string | null
+          id: string
+          raw_text: string | null
+          score_breakdown: Json | null
+          skills: Json | null
+          suggestions: Json | null
+          summary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ats_score?: number | null
+          created_at?: string
+          education?: Json | null
+          experience?: Json | null
+          file_name: string
+          file_path?: string | null
+          id?: string
+          raw_text?: string | null
+          score_breakdown?: Json | null
+          skills?: Json | null
+          suggestions?: Json | null
+          summary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ats_score?: number | null
+          created_at?: string
+          education?: Json | null
+          experience?: Json | null
+          file_name?: string
+          file_path?: string | null
+          id?: string
+          raw_text?: string | null
+          score_breakdown?: Json | null
+          skills?: Json | null
+          suggestions?: Json | null
+          summary?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
