@@ -219,10 +219,10 @@ const ResumeAnalysis = () => {
   );
 };
 
-// Lightweight PDF text extraction using pdfjs-dist legacy build (esbuild-friendly).
+// PDF text extraction using pdfjs-dist v3 legacy build (no top-level await — esbuild-friendly).
 async function extractPdfText(ab: ArrayBuffer): Promise<string> {
-  const pdfjs: any = await import("pdfjs-dist/legacy/build/pdf.mjs");
-  pdfjs.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/legacy/build/pdf.worker.min.mjs";
+  const pdfjs: any = await import("pdfjs-dist/legacy/build/pdf.js");
+  pdfjs.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/legacy/build/pdf.worker.min.js";
   const pdf = await pdfjs.getDocument({ data: ab }).promise;
   let out = "";
   for (let i = 1; i <= pdf.numPages; i++) {
