@@ -14,6 +14,155 @@ export type Database = {
   }
   public: {
     Tables: {
+      certifications: {
+        Row: {
+          created_at: string
+          id: string
+          issue_date: string | null
+          issuing_org: string | null
+          name: string
+          resume_id: string | null
+          source: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          issue_date?: string | null
+          issuing_org?: string | null
+          name: string
+          resume_id?: string | null
+          source?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          issue_date?: string | null
+          issuing_org?: string | null
+          name?: string
+          resume_id?: string | null
+          source?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certifications_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_applications: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          match_score: number | null
+          resume_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          match_score?: number | null
+          resume_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          match_score?: number | null
+          resume_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_applications_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          company: string
+          created_at: string
+          currency: string | null
+          description: string
+          employer_id: string | null
+          experience_level: string | null
+          experience_years_min: number | null
+          id: string
+          is_active: boolean
+          location: string | null
+          required_skills: Json
+          salary_max: number | null
+          salary_min: number | null
+          source: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          currency?: string | null
+          description: string
+          employer_id?: string | null
+          experience_level?: string | null
+          experience_years_min?: number | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          required_skills?: Json
+          salary_max?: number | null
+          salary_min?: number | null
+          source?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          currency?: string | null
+          description?: string
+          employer_id?: string | null
+          experience_level?: string | null
+          experience_years_min?: number | null
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          required_skills?: Json
+          salary_max?: number | null
+          salary_min?: number | null
+          source?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -92,15 +241,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "employer" | "job_seeker"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -227,6 +403,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "employer", "job_seeker"],
+    },
   },
 } as const
