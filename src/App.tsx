@@ -11,6 +11,10 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/dashboard/Dashboard";
 import ResumeAnalysis from "./pages/dashboard/ResumeAnalysis";
+import Jobs from "./pages/dashboard/Jobs";
+import AppliedJobs from "./pages/dashboard/AppliedJobs";
+import Certifications from "./pages/dashboard/Certifications";
+import Employer from "./pages/dashboard/Employer";
 import Profile from "./pages/dashboard/Profile";
 import { ComingSoon } from "./pages/dashboard/ComingSoon";
 import NotFound from "./pages/NotFound";
@@ -31,9 +35,11 @@ const App = () => (
             <Route path="/app" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="resume" element={<ResumeAnalysis />} />
-              <Route path="jobs" element={<ComingSoon title="Jobs" desc="AI-matched roles based on your resume." />} />
+              <Route path="jobs" element={<Jobs />} />
               <Route path="learning" element={<ComingSoon title="Learning Plan" desc="Weekly roadmap to close skill gaps." />} />
-              <Route path="applied" element={<ComingSoon title="Applied Jobs" desc="Track applications and outcomes." />} />
+              <Route path="applied" element={<AppliedJobs />} />
+              <Route path="certifications" element={<Certifications />} />
+              <Route path="employer" element={<Employer />} />
               <Route path="profile" element={<Profile />} />
             </Route>
             <Route path="*" element={<NotFound />} />

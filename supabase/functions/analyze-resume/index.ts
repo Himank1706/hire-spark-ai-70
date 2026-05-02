@@ -100,8 +100,20 @@ Deno.serve(async (req) => {
                 },
                 ats_score: { type: "number", description: "0-100 total ATS score." },
                 suggestions: { type: "array", items: { type: "string" }, description: "Concrete improvement suggestions." },
+                certifications: {
+                  type: "array",
+                  description: "Certifications, licenses, or completed courses found in the resume.",
+                  items: {
+                    type: "object",
+                    properties: {
+                      name: { type: "string", description: "Name of the certification or course." },
+                      issuing_org: { type: "string", description: "Issuing body (e.g. AWS, Google, Coursera). Empty string if unknown." },
+                    },
+                    required: ["name", "issuing_org"],
+                  },
+                },
               },
-              required: ["summary", "skills", "education", "experience", "score_breakdown", "ats_score", "suggestions"],
+              required: ["summary", "skills", "education", "experience", "score_breakdown", "ats_score", "suggestions", "certifications"],
             },
           },
         }],
@@ -146,7 +158,30 @@ Deno.serve(async (req) => {
       return json({ error: dbErr.message }, 500);
     }
 
-    return json({ resume: inserted });
+    // Persist extracted certifications (de-duplicate by name per user)
+    const certs = Array.isArray(analysis.certifications) ? analysis.certifications : [];
+    if (certs.length > 0) {
+      const { data: existing } = await supabase
+        .from("certifications")
+        .select("name")
+        .eq("user_id", user.id);
+      const existingNames = new Set((existing ?? []).map((c: any) => c.name.toLowerCase().trim()));
+      const toInsert = certs
+        .filter((c: any) => c?.name && !existingNames.has(String(c.name).toLowerCase().trim()))
+        .map((c: any) => ({
+          user_id: user.id,
+          name: String(c.name).slice(0, 200),
+          issuing_org: c.issuing_org ? String(c.issuing_org).slice(0, 200) : null,
+          source: "resume",
+          resume_id: inserted.id,
+        }));
+      if (toInsert.length > 0) {
+        const { error: certErr } = await supabase.from("certifications").insert(toInsert);
+        if (certErr) console.error("Cert insert error:", certErr);
+      }
+    }
+
+    return json({ resume: inserted, certifications_added: certs.length });
   } catch (e) {
     console.error("analyze-resume error:", e);
     return json({ error: e instanceof Error ? e.message : "Unknown error" }, 500);

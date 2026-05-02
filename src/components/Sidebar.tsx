@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileText, Briefcase, Award, User, LogOut, Brain, BookOpen } from "lucide-react";
+import { LayoutDashboard, FileText, Briefcase, Award, User, LogOut, Brain, BookOpen, Building2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -10,6 +10,8 @@ const items = [
   { to: "/app/jobs", icon: Briefcase, label: "Jobs" },
   { to: "/app/learning", icon: BookOpen, label: "Learning Plan" },
   { to: "/app/applied", icon: Award, label: "Applied Jobs" },
+  { to: "/app/certifications", icon: Award, label: "Certifications" },
+  { to: "/app/employer", icon: Building2, label: "For Employers" },
   { to: "/app/profile", icon: User, label: "Profile" },
 ];
 
@@ -30,7 +32,7 @@ export const Sidebar = () => {
           </div>
         </div>
       </div>
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {items.map(({ to, icon: Icon, label, end }) => (
           <NavLink
             key={to} to={to} end={end}
