@@ -112,8 +112,12 @@ Deno.serve(async (req) => {
                     required: ["name", "issuing_org"],
                   },
                 },
+                strengths: { type: "array", items: { type: "string" }, description: "3-5 concrete strengths of this resume." },
+                weaknesses: { type: "array", items: { type: "string" }, description: "3-5 concrete weaknesses." },
+                missing_keywords: { type: "array", items: { type: "string" }, description: "ATS keywords likely missing for the inferred target role." },
+                formatting_issues: { type: "array", items: { type: "string" }, description: "Specific formatting / structural issues (length, sections, action verbs, metrics)." },
               },
-              required: ["summary", "skills", "education", "experience", "score_breakdown", "ats_score", "suggestions", "certifications"],
+              required: ["summary", "skills", "education", "experience", "score_breakdown", "ats_score", "suggestions", "certifications", "strengths", "weaknesses", "missing_keywords", "formatting_issues"],
             },
           },
         }],
@@ -149,6 +153,10 @@ Deno.serve(async (req) => {
         score_breakdown: analysis.score_breakdown,
         suggestions: analysis.suggestions,
         summary: analysis.summary,
+        strengths: analysis.strengths ?? [],
+        weaknesses: analysis.weaknesses ?? [],
+        missing_keywords: analysis.missing_keywords ?? [],
+        formatting_issues: analysis.formatting_issues ?? [],
       })
       .select()
       .single();

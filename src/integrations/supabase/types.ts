@@ -163,6 +163,176 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_plans: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean
+          resume_id: string | null
+          summary: string | null
+          target_role: string
+          total_weeks: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          resume_id?: string | null
+          summary?: string | null
+          target_role: string
+          total_weeks?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          resume_id?: string | null
+          summary?: string | null
+          target_role?: string
+          total_weeks?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      plan_tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          estimated_hours: number | null
+          id: string
+          is_completed: boolean
+          plan_id: string
+          provider: string | null
+          sort_order: number
+          task_type: string
+          title: string
+          url: string | null
+          week_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_hours?: number | null
+          id?: string
+          is_completed?: boolean
+          plan_id: string
+          provider?: string | null
+          sort_order?: number
+          task_type?: string
+          title: string
+          url?: string | null
+          week_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_hours?: number | null
+          id?: string
+          is_completed?: boolean
+          plan_id?: string
+          provider?: string | null
+          sort_order?: number
+          task_type?: string
+          title?: string
+          url?: string | null
+          week_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_tasks_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "learning_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_tasks_week_id_fkey"
+            columns: ["week_id"]
+            isOneToOne: false
+            referencedRelation: "plan_weeks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plan_weeks: {
+        Row: {
+          created_at: string
+          description: string | null
+          focus_skills: Json
+          id: string
+          plan_id: string
+          title: string
+          week_number: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          focus_skills?: Json
+          id?: string
+          plan_id: string
+          title: string
+          week_number: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          focus_skills?: Json
+          id?: string
+          plan_id?: string
+          title?: string
+          week_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_weeks_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "learning_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -198,14 +368,18 @@ export type Database = {
           experience: Json | null
           file_name: string
           file_path: string | null
+          formatting_issues: Json | null
           id: string
+          missing_keywords: Json | null
           raw_text: string | null
           score_breakdown: Json | null
           skills: Json | null
+          strengths: Json | null
           suggestions: Json | null
           summary: string | null
           updated_at: string
           user_id: string
+          weaknesses: Json | null
         }
         Insert: {
           ats_score?: number | null
@@ -214,14 +388,18 @@ export type Database = {
           experience?: Json | null
           file_name: string
           file_path?: string | null
+          formatting_issues?: Json | null
           id?: string
+          missing_keywords?: Json | null
           raw_text?: string | null
           score_breakdown?: Json | null
           skills?: Json | null
+          strengths?: Json | null
           suggestions?: Json | null
           summary?: string | null
           updated_at?: string
           user_id: string
+          weaknesses?: Json | null
         }
         Update: {
           ats_score?: number | null
@@ -230,14 +408,18 @@ export type Database = {
           experience?: Json | null
           file_name?: string
           file_path?: string | null
+          formatting_issues?: Json | null
           id?: string
+          missing_keywords?: Json | null
           raw_text?: string | null
           score_breakdown?: Json | null
           skills?: Json | null
+          strengths?: Json | null
           suggestions?: Json | null
           summary?: string | null
           updated_at?: string
           user_id?: string
+          weaknesses?: Json | null
         }
         Relationships: []
       }
