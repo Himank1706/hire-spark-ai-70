@@ -18,6 +18,10 @@ type Analysis = {
   experience: { title: string; company: string; duration?: string; highlights?: string[] }[];
   suggestions: string[];
   summary: string;
+  strengths?: string[];
+  weaknesses?: string[];
+  missing_keywords?: string[];
+  formatting_issues?: string[];
 };
 
 const ResumeAnalysis = () => {
