@@ -166,9 +166,72 @@ const ResumeAnalysis = () => {
             </Card>
           </div>
 
+          {/* Strengths / Weaknesses */}
+          <div className="grid gap-6 md:grid-cols-2">
+            {result.strengths && result.strengths.length > 0 && (
+              <Card className="p-6 border-success/30">
+                <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-success" /> Strengths
+                </h3>
+                <ul className="space-y-2">
+                  {result.strengths.map((s, i) => (
+                    <li key={i} className="flex gap-2 text-sm">
+                      <span className="text-success">✓</span><span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )}
+            {result.weaknesses && result.weaknesses.length > 0 && (
+              <Card className="p-6 border-destructive/30">
+                <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-destructive" /> Weaknesses
+                </h3>
+                <ul className="space-y-2">
+                  {result.weaknesses.map((s, i) => (
+                    <li key={i} className="flex gap-2 text-sm">
+                      <span className="text-destructive">✗</span><span>{s}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )}
+          </div>
+
+          {/* Missing keywords */}
+          {result.missing_keywords && result.missing_keywords.length > 0 && (
+            <Card className="p-6">
+              <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" /> Missing ATS Keywords
+              </h3>
+              <p className="text-sm text-muted-foreground mb-3">Add these keywords (where truthful) to improve ATS matching:</p>
+              <div className="flex flex-wrap gap-2">
+                {result.missing_keywords.map((k, i) => (
+                  <Badge key={i} variant="outline" className="border-primary/40 text-primary">{k}</Badge>
+                ))}
+              </div>
+            </Card>
+          )}
+
+          {/* Formatting issues */}
+          {result.formatting_issues && result.formatting_issues.length > 0 && (
+            <Card className="p-6">
+              <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
+                <FileText className="h-5 w-5 text-secondary" /> Formatting Issues
+              </h3>
+              <ul className="space-y-2">
+                {result.formatting_issues.map((s, i) => (
+                  <li key={i} className="flex gap-2 text-sm">
+                    <span className="text-muted-foreground">⚠</span><span>{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          )}
+
           <Card className="p-6">
             <h3 className="font-display font-bold text-lg mb-4 flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-primary" /> AI Suggestions
+              <AlertCircle className="h-5 w-5 text-primary" /> Improvement Suggestions
             </h3>
             <ul className="space-y-3">
               {result.suggestions.map((s, i) => (
