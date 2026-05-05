@@ -153,6 +153,10 @@ Deno.serve(async (req) => {
         score_breakdown: analysis.score_breakdown,
         suggestions: analysis.suggestions,
         summary: analysis.summary,
+        strengths: analysis.strengths ?? [],
+        weaknesses: analysis.weaknesses ?? [],
+        missing_keywords: analysis.missing_keywords ?? [],
+        formatting_issues: analysis.formatting_issues ?? [],
       })
       .select()
       .single();
