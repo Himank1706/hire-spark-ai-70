@@ -16,6 +16,7 @@ import AppliedJobs from "./pages/dashboard/AppliedJobs";
 import Certifications from "./pages/dashboard/Certifications";
 import Employer from "./pages/dashboard/Employer";
 import Profile from "./pages/dashboard/Profile";
+import LearningPlan from "./pages/dashboard/LearningPlan";
 import { ComingSoon } from "./pages/dashboard/ComingSoon";
 import NotFound from "./pages/NotFound";
 
@@ -36,7 +37,7 @@ const App = () => (
               <Route index element={<Dashboard />} />
               <Route path="resume" element={<ResumeAnalysis />} />
               <Route path="jobs" element={<Jobs />} />
-              <Route path="learning" element={<ComingSoon title="Learning Plan" desc="Weekly roadmap to close skill gaps." />} />
+              <Route path="learning" element={<LearningPlan />} />
               <Route path="applied" element={<AppliedJobs />} />
               <Route path="certifications" element={<Certifications />} />
               <Route path="employer" element={<Employer />} />
