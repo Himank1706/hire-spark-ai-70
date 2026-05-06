@@ -81,7 +81,6 @@ const ResumeAnalysis = () => {
     if (!user) return;
     if (text.trim().length < 50) { toast.error("Please paste or upload a resume with more content."); return; }
     setLoading(true);
-    setResult(null);
 
     let filePath: string | null = null;
     try {
@@ -91,7 +90,10 @@ const ResumeAnalysis = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       setResult(data.resume as Analysis);
+      setShowUploader(false);
+      setText("");
       toast.success("Analysis complete!");
+      loadLatest();
     } catch (e: any) {
       toast.error(e?.message ?? "Analysis failed");
     } finally {
@@ -99,52 +101,63 @@ const ResumeAnalysis = () => {
     }
   };
 
+  const Uploader = (
+    <Card className="mt-8 p-8">
+      <div
+        onClick={() => inputRef.current?.click()}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); }}
+        className="border-2 border-dashed border-border rounded-xl p-10 text-center cursor-pointer hover:border-primary/60 hover:bg-primary/5 transition-smooth"
+      >
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full gradient-primary shadow-glow mb-4">
+          <Upload className="h-6 w-6 text-primary-foreground" />
+        </div>
+        <p className="font-semibold">Drop your resume here</p>
+        <p className="text-sm text-muted-foreground mt-1">PDF or .txt — or paste text below</p>
+        <input ref={inputRef} type="file" accept=".pdf,.txt,.docx" className="hidden"
+          onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+      </div>
+
+      <div className="mt-6">
+        <label className="text-sm font-medium">Or paste resume text</label>
+        <Textarea
+          className="mt-2 min-h-[200px] font-mono text-xs"
+          placeholder="Paste your full resume text here…"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          maxLength={50000}
+        />
+        <p className="text-xs text-muted-foreground mt-1">{text.length} characters</p>
+      </div>
+
+      <Button variant="hero" size="lg" className="mt-6 w-full md:w-auto h-12 px-8" onClick={analyze} disabled={loading}>
+        {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</> : <><Sparkles className="h-4 w-4" /> Run AI Analysis</>}
+      </Button>
+    </Card>
+  );
+
   return (
     <div className="p-6 md:p-10 max-w-6xl mx-auto">
-      <h1 className="font-display text-3xl md:text-4xl font-bold">Resume Analysis</h1>
-      <p className="text-muted-foreground mt-2">Upload or paste your resume. We score it against modern ATS rubrics in seconds.</p>
-
-      {!result && (
-        <Card className="mt-8 p-8">
-          <div
-            onClick={() => inputRef.current?.click()}
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) handleFile(f); }}
-            className="border-2 border-dashed border-border rounded-xl p-10 text-center cursor-pointer hover:border-primary/60 hover:bg-primary/5 transition-smooth"
-          >
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full gradient-primary shadow-glow mb-4">
-              <Upload className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <p className="font-semibold">Drop your resume here</p>
-            <p className="text-sm text-muted-foreground mt-1">PDF or .txt — or paste text below</p>
-            <input ref={inputRef} type="file" accept=".pdf,.txt,.docx" className="hidden"
-              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-          </div>
-
-          <div className="mt-6">
-            <label className="text-sm font-medium">Or paste resume text</label>
-            <Textarea
-              className="mt-2 min-h-[200px] font-mono text-xs"
-              placeholder="Paste your full resume text here…"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              maxLength={50000}
-            />
-            <p className="text-xs text-muted-foreground mt-1">{text.length} characters</p>
-          </div>
-
-          <Button variant="hero" size="lg" className="mt-6 w-full md:w-auto h-12 px-8" onClick={analyze} disabled={loading}>
-            {loading ? <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing…</> : <><Sparkles className="h-4 w-4" /> Run AI Analysis</>}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="font-display text-3xl md:text-4xl font-bold">Resume Analysis</h1>
+          <p className="text-muted-foreground mt-2">Your latest analyzed resume is shown below. Upload a new one anytime.</p>
+        </div>
+        {result && (
+          <Button variant="heroOutline" onClick={() => setShowUploader((s) => !s)}>
+            <Upload className="h-4 w-4" /> {showUploader ? "Hide uploader" : "Analyze new resume"}
           </Button>
-        </Card>
-      )}
+        )}
+      </div>
+
+      {(!result || showUploader) && Uploader}
 
       {result && (
         <div className="mt-8 space-y-6">
           <Card className="p-8 gradient-secondary text-secondary-foreground">
             <div className="flex flex-wrap items-center justify-between gap-6">
               <div>
-                <p className="text-sm uppercase tracking-wider text-secondary-foreground/80">Your ATS Score</p>
+                <p className="text-sm uppercase tracking-wider text-secondary-foreground/80">Latest ATS Score · {result.file_name}</p>
                 <p className="font-display text-6xl font-extrabold mt-1">{result.ats_score}<span className="text-2xl text-secondary-foreground/70">/100</span></p>
                 <p className="mt-2 text-secondary-foreground/90 max-w-xl">{result.summary}</p>
               </div>
