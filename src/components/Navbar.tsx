@@ -7,9 +7,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export const Navbar = () => {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const loc = useLocation();
-  if (loc.pathname.startsWith("/app")) return null;
+  if (loc.pathname.startsWith("/app") || loc.pathname.startsWith("/employer")) return null;
+  const home = role === "employer" ? "/employer" : "/app";
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-lg">
@@ -42,7 +43,7 @@ export const Navbar = () => {
 
         <div className="flex items-center gap-2">
           {user ? (
-            <Button asChild variant="hero"><Link to="/app">Dashboard</Link></Button>
+            <Button asChild variant="hero"><Link to={home}>Dashboard</Link></Button>
           ) : (
             <>
               <Button asChild variant="ghost" className="hidden sm:inline-flex"><Link to="/login">Login</Link></Button>

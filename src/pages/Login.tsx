@@ -25,11 +25,19 @@ const Login = () => {
     const parsed = schema.safeParse({ email, password });
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: parsed.data.email, password: parsed.data.password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email: parsed.data.email, password: parsed.data.password });
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Welcome back!");
-    nav("/app");
+    // Route by role — employers go to their portal, others to the seeker app
+    let dest = "/app";
+    if (data.user) {
+      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id);
+      const list = (roles ?? []).map((r: any) => r.role);
+      if (list.includes("employer") && !list.includes("job_seeker")) dest = "/employer";
+      else if (list.includes("employer")) dest = "/employer"; // employer wins if both
+    }
+    nav(dest);
   };
 
   return (
