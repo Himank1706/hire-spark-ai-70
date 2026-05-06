@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { LayoutDashboard, FileText, Briefcase, Award, User, LogOut, Brain, BookOpen, Building2 } from "lucide-react";
+import { LayoutDashboard, FileText, Briefcase, Award, User, LogOut, Brain, BookOpen } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -11,7 +11,6 @@ const items = [
   { to: "/app/learning", icon: BookOpen, label: "Learning Plan" },
   { to: "/app/applied", icon: Award, label: "Applied Jobs" },
   { to: "/app/certifications", icon: Award, label: "Certifications" },
-  { to: "/app/employer", icon: Building2, label: "For Employers" },
   { to: "/app/profile", icon: User, label: "Profile" },
 ];
 

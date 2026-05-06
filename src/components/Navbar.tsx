@@ -37,7 +37,7 @@ export const Navbar = () => {
           <Button variant="ghost" asChild><a href="#features">Features</a></Button>
           <Button variant="ghost" asChild><a href="#how">How It Works</a></Button>
           <Button variant="ghost" asChild><a href="#results">Results</a></Button>
-          <Button variant="ghost" asChild className="font-semibold text-secondary"><Link to="/app/employer">For Employers</Link></Button>
+          <Button variant="ghost" asChild className="font-semibold text-secondary"><Link to="/employer/signup">For Employers</Link></Button>
         </nav>
 
         <div className="flex items-center gap-2">
