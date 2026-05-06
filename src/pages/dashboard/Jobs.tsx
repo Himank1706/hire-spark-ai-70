@@ -74,6 +74,19 @@ const Jobs = () => {
     });
     setApplying(null);
     if (error) { toast.error(error.message); return; }
+    // Notify the employer in real time (best-effort; RLS-safe via own row insert pattern)
+    try {
+      const { data: j } = await supabase.from("jobs").select("employer_id, title").eq("id", job.id).maybeSingle();
+      if (j?.employer_id) {
+        await supabase.from("notifications").insert({
+          user_id: j.employer_id,
+          type: "applicant",
+          title: "New applicant",
+          body: `A candidate applied to ${j.title} (${job.match_score}% match)`,
+          link: "/employer/applicants",
+        });
+      }
+    } catch { /* non-blocking */ }
     toast.success(`Applied to ${job.title}`);
     setJobs((prev) => prev.filter((j) => j.id !== job.id));
   };
