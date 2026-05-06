@@ -51,7 +51,17 @@ const Jobs = () => {
     setLoading(false);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    const channel = supabase
+      .channel("jobs-feed")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "jobs" }, () => {
+        toast.message("New job posted — refreshing matches");
+        load();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
 
   const apply = async (job: Job) => {
     if (!user) return;
