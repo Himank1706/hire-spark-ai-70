@@ -9,6 +9,8 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import EmployerSignup from "./pages/EmployerSignup";
+import { EmployerLayout } from "./components/EmployerLayout";
 import Dashboard from "./pages/dashboard/Dashboard";
 import ResumeAnalysis from "./pages/dashboard/ResumeAnalysis";
 import Jobs from "./pages/dashboard/Jobs";
@@ -33,6 +35,10 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/employer/signup" element={<EmployerSignup />} />
+            <Route path="/employer" element={<EmployerLayout />}>
+              <Route index element={<Employer />} />
+            </Route>
             <Route path="/app" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="resume" element={<ResumeAnalysis />} />
@@ -40,7 +46,6 @@ const App = () => (
               <Route path="learning" element={<LearningPlan />} />
               <Route path="applied" element={<AppliedJobs />} />
               <Route path="certifications" element={<Certifications />} />
-              <Route path="employer" element={<Employer />} />
               <Route path="profile" element={<Profile />} />
             </Route>
             <Route path="*" element={<NotFound />} />
