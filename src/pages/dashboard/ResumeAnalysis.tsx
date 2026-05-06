@@ -1,11 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, FileText, Loader2, CheckCircle2, AlertCircle, Sparkles, TrendingUp } from "lucide-react";
+import { Upload, FileText, Loader2, CheckCircle2, AlertCircle, Sparkles, TrendingUp, Clock } from "lucide-react";
 import { toast } from "sonner";
 
 type Analysis = {
@@ -30,7 +30,26 @@ const ResumeAnalysis = () => {
   const [fileName, setFileName] = useState("resume.txt");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Analysis | null>(null);
+  const [recent, setRecent] = useState<Analysis[]>([]);
+  const [showUploader, setShowUploader] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const loadLatest = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("resumes")
+      .select("id, file_name, ats_score, score_breakdown, skills, education, experience, suggestions, summary, strengths, weaknesses, missing_keywords, formatting_issues, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    const list = (data ?? []) as any[];
+    if (list.length > 0) {
+      setResult(list[0] as Analysis);
+      setRecent(list.slice(1) as Analysis[]);
+    }
+  };
+
+  useEffect(() => { loadLatest(); }, [user]);
 
   const handleFile = async (file: File) => {
     setFileName(file.name);
