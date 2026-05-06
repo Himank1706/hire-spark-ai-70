@@ -1,12 +1,8 @@
-import { Outlet, Navigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { NotificationBell } from "./NotificationBell";
-import { useAuth } from "@/contexts/AuthContext";
 
 export const DashboardLayout = () => {
-  const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
-  if (!user) return <Navigate to="/login" replace />;
   return (
     <div className="flex min-h-screen bg-muted/20">
       <Sidebar />
