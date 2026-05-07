@@ -31,14 +31,14 @@ const Signup = () => {
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
-        emailRedirectTo: `${window.location.origin}/app`,
+        emailRedirectTo: `${window.location.origin}/app/dashboard`,
         data: { full_name: parsed.data.fullName },
       },
     });
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Account created! Welcome aboard.");
-    nav("/app");
+    nav("/app/dashboard");
   };
 
   return (
