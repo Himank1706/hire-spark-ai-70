@@ -7,7 +7,7 @@ import { RequireRole } from "./RequireRole";
 import { toast } from "sonner";
 
 const items = [
-  { to: "/employer", icon: LayoutDashboard, label: "Overview", end: true },
+  { to: "/employer/dashboard", icon: LayoutDashboard, label: "Overview", end: true },
   { to: "/employer/post", icon: PlusCircle, label: "Post Job" },
   { to: "/employer/jobs", icon: Briefcase, label: "Manage Jobs" },
   { to: "/employer/applicants", icon: Users, label: "Applicants" },
@@ -24,7 +24,7 @@ export const EmployerLayout = () => {
       <div className="flex min-h-screen bg-muted/20">
         <aside className="hidden md:flex w-64 shrink-0 flex-col border-r border-border bg-sidebar h-screen sticky top-0">
           <div className="p-6 border-b border-sidebar-border">
-            <NavLink to="/employer" className="flex items-center gap-2">
+            <NavLink to="/employer/dashboard" className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl gradient-primary shadow-glow">
                 <Building2 className="h-5 w-5 text-primary-foreground" />
               </div>
