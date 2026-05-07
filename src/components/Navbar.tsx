@@ -10,7 +10,7 @@ export const Navbar = () => {
   const { user, role } = useAuth();
   const loc = useLocation();
   if (loc.pathname.startsWith("/app") || loc.pathname.startsWith("/employer")) return null;
-  const home = role === "employer" ? "/employer" : "/app";
+  const home = role === "employer" ? "/employer/dashboard" : "/app/dashboard";
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-lg">
