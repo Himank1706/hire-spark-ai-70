@@ -35,7 +35,7 @@ const EmployerSignup = () => {
           email: form.email,
           password: form.password,
           options: {
-            emailRedirectTo: `${window.location.origin}/employer`,
+            emailRedirectTo: `${window.location.origin}/employer/dashboard`,
             data: { full_name: form.fullName, company: form.company, intent: "employer" },
           },
         });
