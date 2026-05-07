@@ -5,8 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 export type AppRole = "employer" | "job_seeker" | "admin";
 
 export const resolveAppRole = (roles: AppRole[]): AppRole => {
-  if (roles.includes("admin")) return "admin";
   if (roles.includes("employer")) return "employer";
+  if (roles.includes("admin")) return "admin";
   return "job_seeker";
 };
 
