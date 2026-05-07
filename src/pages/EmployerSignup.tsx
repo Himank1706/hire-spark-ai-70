@@ -40,10 +40,7 @@ const EmployerSignup = () => {
           },
         });
         if (error) throw error;
-        if (data.user) {
-          await supabase.from("user_roles").insert({ user_id: data.user.id, role: "employer" as any });
-          await refreshRole();
-        }
+        if (data.user) await refreshRole();
         toast.success("Employer account created");
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
