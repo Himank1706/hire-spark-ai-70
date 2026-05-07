@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -44,7 +44,8 @@ const App = () => (
 
             {/* Employer area — only employers/admins */}
             <Route path="/employer" element={<EmployerLayout />}>
-              <Route index element={<EmployerOverview />} />
+              <Route index element={<Navigate to="/employer/dashboard" replace />} />
+              <Route path="dashboard" element={<EmployerOverview />} />
               <Route path="post" element={<EmployerPostJob />} />
               <Route path="jobs" element={<EmployerManageJobs />} />
               <Route path="applicants" element={<EmployerApplicants />} />
@@ -61,7 +62,8 @@ const App = () => (
                 </RequireRole>
               }
             >
-              <Route index element={<Dashboard />} />
+              <Route index element={<Navigate to="/app/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
               <Route path="resume" element={<ResumeAnalysis />} />
               <Route path="jobs" element={<Jobs />} />
               <Route path="learning" element={<LearningPlan />} />
