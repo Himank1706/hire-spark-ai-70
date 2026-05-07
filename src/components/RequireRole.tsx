@@ -4,6 +4,8 @@ import { AppRole, useAuth } from "@/contexts/AuthContext";
 
 type Props = { allow: AppRole[]; children: ReactNode; redirectTo?: string };
 
+const dashboardFor = (role: AppRole | null) => (role === "employer" ? "/employer/dashboard" : "/app/dashboard");
+
 /** Route guard. Sends authenticated users to the right home if their role mismatches. */
 export const RequireRole = ({ allow, children, redirectTo }: Props) => {
   const { user, loading, role, roleLoading } = useAuth();
@@ -18,7 +20,7 @@ export const RequireRole = ({ allow, children, redirectTo }: Props) => {
   }
   if (role && !allow.includes(role)) {
     // Push them to their natural home
-    const home = redirectTo ?? (role === "employer" ? "/employer" : "/app");
+    const home = redirectTo ?? dashboardFor(role);
     return <Navigate to={home} replace />;
   }
   return <>{children}</>;

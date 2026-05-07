@@ -4,6 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 export type AppRole = "employer" | "job_seeker" | "admin";
 
+export const resolveAppRole = (roles: AppRole[]): AppRole => {
+  if (roles.includes("employer")) return "employer";
+  if (roles.includes("admin")) return "admin";
+  return "job_seeker";
+};
+
 type AuthCtx = {
   user: User | null;
   session: Session | null;
@@ -31,13 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setRoleLoading(true);
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
     const roles = (data ?? []).map((r: any) => r.role as AppRole);
-    // employer wins over job_seeker; admin wins overall
-    const resolved: AppRole = roles.includes("admin")
-      ? "admin"
-      : roles.includes("employer")
-        ? "employer"
-        : "job_seeker";
-    setRole(resolved);
+    setRole(resolveAppRole(roles));
     setRoleLoading(false);
   };
 

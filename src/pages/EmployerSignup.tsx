@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { AppRole, resolveAppRole, useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,18 +10,19 @@ import { Building2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const EmployerSignup = () => {
-  const { user } = useAuth();
+  const { user, refreshRole } = useAuth();
   const nav = useNavigate();
   const [mode, setMode] = useState<"signup" | "login">("signup");
   const [form, setForm] = useState({ fullName: "", company: "", email: "", password: "" });
   const [busy, setBusy] = useState(false);
 
-  // If already signed in, ensure employer role and route to dashboard
+  // If already signed in, route to the correct dashboard by persisted role.
   useEffect(() => {
     if (!user) return;
     (async () => {
-      await supabase.from("user_roles").insert({ user_id: user.id, role: "employer" as any }).select();
-      nav("/employer", { replace: true });
+      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+      const resolved = resolveAppRole((roles ?? []).map((r: any) => r.role as AppRole));
+      nav(resolved === "employer" ? "/employer/dashboard" : "/app/dashboard", { replace: true });
     })();
   }, [user, nav]);
 
@@ -34,24 +35,22 @@ const EmployerSignup = () => {
           email: form.email,
           password: form.password,
           options: {
-            emailRedirectTo: `${window.location.origin}/employer`,
+            emailRedirectTo: `${window.location.origin}/employer/dashboard`,
             data: { full_name: form.fullName, company: form.company, intent: "employer" },
           },
         });
         if (error) throw error;
-        if (data.user) {
-          await supabase.from("user_roles").insert({ user_id: data.user.id, role: "employer" as any });
-        }
+        if (data.user) await refreshRole();
         toast.success("Employer account created");
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
         if (error) throw error;
         if (data.user) {
-          await supabase.from("user_roles").insert({ user_id: data.user.id, role: "employer" as any });
+          await refreshRole();
         }
         toast.success("Welcome back");
       }
-      nav("/employer");
+      nav("/employer/dashboard");
     } catch (err: any) {
       toast.error(err.message ?? "Something went wrong");
     } finally {

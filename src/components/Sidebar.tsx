@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const items = [
-  { to: "/app", icon: LayoutDashboard, label: "Dashboard", end: true },
+  { to: "/app/dashboard", icon: LayoutDashboard, label: "Dashboard", end: true },
   { to: "/app/resume", icon: FileText, label: "Resume Analysis" },
   { to: "/app/jobs", icon: Briefcase, label: "Jobs" },
   { to: "/app/learning", icon: BookOpen, label: "Learning Plan" },
