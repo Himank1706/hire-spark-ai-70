@@ -19,8 +19,7 @@ export const resolveRoleForUser = async (authUser: User, requestedRole?: SignupR
   let roles = (data ?? []).map((r: any) => r.role as AppRole);
 
   const roleToPersist = requestedRole ?? (metadataIntent === "employer" && !roles.includes("employer") ? "employer" : roles.length === 0 ? metadataIntent : undefined);
-  const shouldCompleteOnboarding = Boolean(roleToPersist && !roles.includes(roleToPersist));
-  if (shouldCompleteOnboarding) {
+  if (roleToPersist && !roles.includes(roleToPersist)) {
     const { data: resolved } = await (supabase as any).rpc("complete_role_onboarding", {
       _role: roleToPersist,
       _full_name: authUser.user_metadata?.full_name ?? null,
