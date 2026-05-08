@@ -449,6 +449,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_role_onboarding: {
+        Args: {
+          _full_name?: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
