@@ -1,10 +1,8 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { ReactNode } from "react";
-import { AppRole, useAuth } from "@/contexts/AuthContext";
+import { AppRole, dashboardForRole, useAuth } from "@/contexts/AuthContext";
 
 type Props = { allow: AppRole[]; children: ReactNode; redirectTo?: string };
-
-const dashboardFor = (role: AppRole | null) => (role === "employer" ? "/employer/dashboard" : "/app/dashboard");
 
 /** Route guard. Sends authenticated users to the right home if their role mismatches. */
 export const RequireRole = ({ allow, children, redirectTo }: Props) => {
@@ -20,7 +18,7 @@ export const RequireRole = ({ allow, children, redirectTo }: Props) => {
   }
   if (role && !allow.includes(role)) {
     // Push them to their natural home
-    const home = redirectTo ?? dashboardFor(role);
+    const home = redirectTo ?? dashboardForRole(role);
     return <Navigate to={home} replace />;
   }
   return <>{children}</>;

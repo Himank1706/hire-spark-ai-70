@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { AppRole, resolveAppRole } from "@/contexts/AuthContext";
+import { dashboardForRole, resolveRoleForUser } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,14 +30,8 @@ const Login = () => {
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Welcome back!");
-    // Route by all persisted roles — employer wins when accounts contain both roles.
-    let dest = "/app/dashboard";
-    if (data.user) {
-      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id);
-      const list = (roles ?? []).map((r: any) => r.role as AppRole);
-      dest = resolveAppRole(list) === "employer" ? "/employer/dashboard" : "/app/dashboard";
-    }
-    nav(dest);
+    const role = data.user ? await resolveRoleForUser(data.user) : "job_seeker";
+    nav(dashboardForRole(role), { replace: true });
   };
 
   return (
