@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { AppRole, resolveAppRole, useAuth } from "@/contexts/AuthContext";
+import { dashboardForRole, resolveRoleForUser, useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -20,9 +20,8 @@ const EmployerSignup = () => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
-      const resolved = resolveAppRole((roles ?? []).map((r: any) => r.role as AppRole));
-      nav(resolved === "employer" ? "/employer/dashboard" : "/app/dashboard", { replace: true });
+      const resolved = await resolveRoleForUser(user);
+      nav(dashboardForRole(resolved), { replace: true });
     })();
   }, [user, nav]);
 
@@ -40,12 +39,15 @@ const EmployerSignup = () => {
           },
         });
         if (error) throw error;
-        if (data.user) await refreshRole();
+        if (data.user) await resolveRoleForUser(data.user, "employer");
+        await refreshRole();
         toast.success("Employer account created");
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
         if (error) throw error;
         if (data.user) {
+          const role = await resolveRoleForUser(data.user, "employer");
+          if (role !== "employer") throw new Error("This account is not registered as an employer.");
           await refreshRole();
         }
         toast.success("Welcome back");
