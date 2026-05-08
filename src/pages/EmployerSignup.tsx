@@ -46,7 +46,7 @@ const EmployerSignup = () => {
         const { data, error } = await supabase.auth.signInWithPassword({ email: form.email, password: form.password });
         if (error) throw error;
         if (data.user) {
-          const role = await resolveRoleForUser(data.user, "employer");
+          const role = await resolveRoleForUser(data.user);
           if (role !== "employer") throw new Error("This account is not registered as an employer.");
           await refreshRole();
         }
