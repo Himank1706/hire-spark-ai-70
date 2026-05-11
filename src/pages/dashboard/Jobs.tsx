@@ -155,8 +155,8 @@ const Jobs = () => {
                     </p>
                     <p className="text-[10px] text-muted-foreground">{j.skill_overlap_pct}% skills · {(j.tfidf_similarity * 100).toFixed(0)}% sem.</p>
                   </div>
-                  <Button variant="hero" onClick={() => apply(j)} disabled={applying === j.id}>
-                    {applying === j.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  <Button variant="hero" onClick={() => setApplyJob(j)}>
+                    <Sparkles className="h-4 w-4" />
                     Apply
                   </Button>
                 </div>
@@ -165,6 +165,14 @@ const Jobs = () => {
           ))}
         </div>
       )}
+
+      <ApplyJobDialog
+        job={applyJob}
+        resumeId={resumeId}
+        open={!!applyJob}
+        onOpenChange={(v) => !v && setApplyJob(null)}
+        onApplied={onApplied}
+      />
     </div>
   );
 };
