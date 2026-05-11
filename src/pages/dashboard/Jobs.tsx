@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Briefcase, Loader2, MapPin, DollarSign, CheckCircle2, AlertTriangle, RefreshCw, Target, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { ApplyJobDialog } from "@/components/ApplyJobDialog";
 
 type Job = {
   id: string;
@@ -25,15 +26,16 @@ type Job = {
   tfidf_similarity: number;
   matched_skills: string[];
   missing_skills: string[];
+  employer_id?: string | null;
 };
 
 const Jobs = () => {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [applying, setApplying] = useState<string | null>(null);
   const [resumeId, setResumeId] = useState<string | null>(null);
   const [needsResume, setNeedsResume] = useState(false);
+  const [applyJob, setApplyJob] = useState<Job | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -63,32 +65,8 @@ const Jobs = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const apply = async (job: Job) => {
-    if (!user) return;
-    setApplying(job.id);
-    const { error } = await supabase.from("job_applications").insert({
-      user_id: user.id,
-      job_id: job.id,
-      resume_id: resumeId,
-      match_score: job.match_score,
-    });
-    setApplying(null);
-    if (error) { toast.error(error.message); return; }
-    // Notify the employer in real time (best-effort; RLS-safe via own row insert pattern)
-    try {
-      const { data: j } = await supabase.from("jobs").select("employer_id, title").eq("id", job.id).maybeSingle();
-      if (j?.employer_id) {
-        await supabase.from("notifications").insert({
-          user_id: j.employer_id,
-          type: "applicant",
-          title: "New applicant",
-          body: `A candidate applied to ${j.title} (${job.match_score}% match)`,
-          link: "/employer/applicants",
-        });
-      }
-    } catch { /* non-blocking */ }
-    toast.success(`Applied to ${job.title}`);
-    setJobs((prev) => prev.filter((j) => j.id !== job.id));
+  const onApplied = (jobId: string) => {
+    setJobs((prev) => prev.filter((j) => j.id !== jobId));
   };
 
   if (loading) {
@@ -177,8 +155,8 @@ const Jobs = () => {
                     </p>
                     <p className="text-[10px] text-muted-foreground">{j.skill_overlap_pct}% skills · {(j.tfidf_similarity * 100).toFixed(0)}% sem.</p>
                   </div>
-                  <Button variant="hero" onClick={() => apply(j)} disabled={applying === j.id}>
-                    {applying === j.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                  <Button variant="hero" onClick={() => setApplyJob(j)}>
+                    <Sparkles className="h-4 w-4" />
                     Apply
                   </Button>
                 </div>
@@ -187,6 +165,14 @@ const Jobs = () => {
           ))}
         </div>
       )}
+
+      <ApplyJobDialog
+        job={applyJob}
+        resumeId={resumeId}
+        open={!!applyJob}
+        onOpenChange={(v) => !v && setApplyJob(null)}
+        onApplied={onApplied}
+      />
     </div>
   );
 };

@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2, Users, Star, CheckCircle2, XCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Loader2, Users, Star, FileText, Mail, Phone, Link2, Calendar } from "lucide-react";
 import { toast } from "sonner";
 
 type App = {
@@ -16,22 +17,52 @@ type App = {
   user_id: string;
   job_id: string;
   resume_id: string | null;
+  full_name: string | null;
+  email: string | null;
+  phone: string | null;
+  skills: string[] | null;
+  experience: string | null;
+  education: string | null;
+  portfolio_url: string | null;
+  cover_letter: string | null;
 };
 
 type Job = { id: string; title: string; required_skills: string[] };
-type Resume = { id: string; user_id: string; ats_score: number | null; skills: string[] };
-type Profile = { id: string; full_name: string | null; headline: string | null; avatar_url: string | null };
+type Resume = { id: string; user_id: string; ats_score: number | null; skills: string[]; file_name: string; file_path: string | null };
 
-const STATUS_OPTIONS = ["applied", "reviewing", "shortlisted", "rejected", "hired"];
+const STATUS_OPTIONS = [
+  { value: "applied", label: "Applied" },
+  { value: "under_review", label: "Under Review" },
+  { value: "shortlisted", label: "Shortlisted" },
+  { value: "interview_scheduled", label: "Interview Scheduled" },
+  { value: "rejected", label: "Rejected" },
+  { value: "hired", label: "Hired" },
+];
+
+const STATUS_COLOR: Record<string, string> = {
+  applied: "bg-muted text-foreground",
+  under_review: "bg-secondary/15 text-secondary",
+  shortlisted: "bg-success/15 text-success",
+  interview_scheduled: "bg-primary/15 text-primary",
+  rejected: "bg-destructive/15 text-destructive",
+  hired: "bg-success text-success-foreground",
+};
+
+const scoreTone = (s: number | null) => {
+  if (s == null) return "text-muted-foreground";
+  if (s >= 70) return "text-success";
+  if (s >= 40) return "text-secondary";
+  return "text-destructive";
+};
 
 const Applicants = () => {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [apps, setApps] = useState<App[]>([]);
   const [resumes, setResumes] = useState<Record<string, Resume>>({});
-  const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [filterJob, setFilterJob] = useState<string>("all");
   const [loading, setLoading] = useState(true);
+  const [viewing, setViewing] = useState<App | null>(null);
 
   const load = async () => {
     if (!user) return;
@@ -48,25 +79,18 @@ const Applicants = () => {
 
     const { data: appData } = await supabase
       .from("job_applications")
-      .select("id, status, match_score, created_at, user_id, job_id, resume_id")
+      .select("id, status, match_score, created_at, user_id, job_id, resume_id, full_name, email, phone, skills, experience, education, portfolio_url, cover_letter")
       .in("job_id", jobIds)
       .order("created_at", { ascending: false });
-    const appList = (appData ?? []) as App[];
+    const appList = (appData ?? []) as any as App[];
     setApps(appList);
 
     const resumeIds = Array.from(new Set(appList.map((a) => a.resume_id).filter(Boolean))) as string[];
     if (resumeIds.length) {
-      const { data: r } = await supabase.from("resumes").select("id, user_id, ats_score, skills").in("id", resumeIds);
+      const { data: r } = await supabase.from("resumes").select("id, user_id, ats_score, skills, file_name, file_path").in("id", resumeIds);
       const map: Record<string, Resume> = {};
       (r ?? []).forEach((x: any) => { map[x.id] = x; });
       setResumes(map);
-    }
-    const userIds = Array.from(new Set(appList.map((a) => a.user_id)));
-    if (userIds.length) {
-      const { data: p } = await supabase.from("profiles").select("id, full_name, headline, avatar_url").in("id", userIds);
-      const map: Record<string, Profile> = {};
-      (p ?? []).forEach((x: any) => { map[x.id] = x; });
-      setProfiles(map);
     }
     setLoading(false);
   };
@@ -93,7 +117,27 @@ const Applicants = () => {
     const { error } = await supabase.from("job_applications").update({ status }).eq("id", a.id);
     if (error) { toast.error(error.message); return; }
     setApps((p) => p.map((x) => x.id === a.id ? { ...x, status } : x));
-    toast.success(`Marked ${status}`);
+    // notify the candidate
+    const job = jobs.find((j) => j.id === a.job_id);
+    const label = STATUS_OPTIONS.find((s) => s.value === status)?.label ?? status;
+    try {
+      await supabase.from("notifications").insert({
+        user_id: a.user_id,
+        type: "application",
+        title: `Application ${label}`,
+        body: `Your application for ${job?.title ?? "the role"} is now ${label}.`,
+        link: "/app/applied",
+      });
+    } catch { /* RLS may block; non-blocking */ }
+    toast.success(`Marked ${label}`);
+  };
+
+  const viewResume = async (a: App) => {
+    const r = a.resume_id ? resumes[a.resume_id] : null;
+    if (!r?.file_path) { toast.error("Resume file not available"); return; }
+    const { data, error } = await supabase.storage.from("resumes").createSignedUrl(r.file_path, 60 * 10);
+    if (error || !data?.signedUrl) { toast.error(error?.message || "Couldn't open resume"); return; }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -124,26 +168,34 @@ const Applicants = () => {
           {filtered.sort((a, b) => (b.match_score ?? 0) - (a.match_score ?? 0)).map((a) => {
             const job = jobs.find((j) => j.id === a.job_id);
             const resume = a.resume_id ? resumes[a.resume_id] : null;
-            const profile = profiles[a.user_id];
-            const skills = resume?.skills ?? [];
+            const skills = (a.skills && a.skills.length ? a.skills : resume?.skills) ?? [];
+            const name = a.full_name || `Candidate ${a.user_id.slice(0, 6)}`;
             return (
               <Card key={a.id} className="p-5">
                 <div className="flex items-start justify-between gap-4 flex-wrap">
                   <div className="flex items-start gap-3 min-w-0">
-                    <div className="h-12 w-12 rounded-full gradient-primary text-primary-foreground flex items-center justify-center font-semibold">
-                      {(profile?.full_name ?? "Candidate").slice(0, 1).toUpperCase()}
+                    <div className="h-12 w-12 rounded-full gradient-primary text-primary-foreground flex items-center justify-center font-semibold shrink-0">
+                      {name.slice(0, 1).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold">{profile?.full_name ?? `Candidate ${a.user_id.slice(0, 6)}`}</p>
-                      {profile?.headline && <p className="text-sm text-muted-foreground">{profile.headline}</p>}
-                      <p className="text-xs text-muted-foreground mt-0.5">Applied to <span className="font-medium text-foreground">{job?.title ?? "—"}</span> · {new Date(a.created_at).toLocaleDateString()}</p>
+                      <p className="font-semibold">{name}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                        <span>Applied for <span className="font-medium text-foreground">{job?.title ?? "—"}</span></span>
+                        <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{new Date(a.created_at).toLocaleDateString()}</span>
+                      </p>
+                      <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1 text-xs text-muted-foreground">
+                        {a.email && <span className="inline-flex items-center gap-1"><Mail className="h-3 w-3" />{a.email}</span>}
+                        {a.phone && <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" />{a.phone}</span>}
+                        {a.portfolio_url && <a href={a.portfolio_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 hover:text-foreground underline-offset-2 hover:underline"><Link2 className="h-3 w-3" />Portfolio</a>}
+                      </div>
                       {skills.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 mt-2">
-                          {skills.slice(0, 8).map((s) => (
+                          {skills.slice(0, 10).map((s) => (
                             <Badge key={s} variant="secondary" className="bg-accent text-accent-foreground">{s}</Badge>
                           ))}
                         </div>
                       )}
+                      <Badge className={`mt-2 capitalize ${STATUS_COLOR[a.status] ?? "bg-muted"}`}>{(STATUS_OPTIONS.find((s) => s.value === a.status)?.label ?? a.status).toString()}</Badge>
                     </div>
                   </div>
 
@@ -151,18 +203,22 @@ const Applicants = () => {
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Match</p>
-                        <p className="font-display font-bold text-secondary">{a.match_score ?? "—"}%</p>
+                        <p className={`font-display font-bold ${scoreTone(a.match_score)}`}>{a.match_score ?? "—"}%</p>
                       </div>
                       <div className="text-right">
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">ATS</p>
                         <p className="font-display font-bold">{resume?.ats_score ?? "—"}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5 justify-end">
+                      <Button size="sm" variant="outline" onClick={() => setViewing(a)}>Details</Button>
+                      <Button size="sm" variant="outline" onClick={() => viewResume(a)} disabled={!resume?.file_path}>
+                        <FileText className="h-3.5 w-3.5" /> Resume
+                      </Button>
                       <Select value={a.status} onValueChange={(v) => setStatus(a, v)}>
-                        <SelectTrigger className="h-8 w-36 capitalize"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="h-8 w-44 capitalize"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          {STATUS_OPTIONS.map((s) => <SelectItem key={s} value={s} className="capitalize">{s}</SelectItem>)}
+                          {STATUS_OPTIONS.map((s) => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
                       <Button size="sm" variant={a.status === "shortlisted" ? "hero" : "outline"} onClick={() => setStatus(a, "shortlisted")}>
@@ -176,6 +232,34 @@ const Applicants = () => {
           })}
         </div>
       )}
+
+      <Dialog open={!!viewing} onOpenChange={(v) => !v && setViewing(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{viewing?.full_name ?? "Applicant"}</DialogTitle>
+            <DialogDescription>
+              Applied for {jobs.find((j) => j.id === viewing?.job_id)?.title} · {viewing && new Date(viewing.created_at).toLocaleString()}
+            </DialogDescription>
+          </DialogHeader>
+          {viewing && (
+            <div className="grid gap-4 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <div><p className="text-xs text-muted-foreground">Email</p><p>{viewing.email ?? "—"}</p></div>
+                <div><p className="text-xs text-muted-foreground">Phone</p><p>{viewing.phone ?? "—"}</p></div>
+              </div>
+              {viewing.portfolio_url && (
+                <div><p className="text-xs text-muted-foreground">Portfolio / LinkedIn</p><a href={viewing.portfolio_url} target="_blank" rel="noreferrer" className="text-secondary hover:underline break-all">{viewing.portfolio_url}</a></div>
+              )}
+              <div><p className="text-xs text-muted-foreground">Skills</p>
+                <div className="flex flex-wrap gap-1.5 mt-1">{(viewing.skills ?? []).map((s) => <Badge key={s} variant="secondary" className="bg-accent text-accent-foreground">{s}</Badge>)}</div>
+              </div>
+              <div><p className="text-xs text-muted-foreground">Experience</p><p className="whitespace-pre-wrap">{viewing.experience ?? "—"}</p></div>
+              <div><p className="text-xs text-muted-foreground">Education</p><p className="whitespace-pre-wrap">{viewing.education ?? "—"}</p></div>
+              <div><p className="text-xs text-muted-foreground">Cover Letter</p><p className="whitespace-pre-wrap">{viewing.cover_letter ?? "—"}</p></div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -60,31 +60,55 @@ export type Database = {
       }
       job_applications: {
         Row: {
+          cover_letter: string | null
           created_at: string
+          education: string | null
+          email: string | null
+          experience: string | null
+          full_name: string | null
           id: string
           job_id: string
           match_score: number | null
+          phone: string | null
+          portfolio_url: string | null
           resume_id: string | null
+          skills: Json
           status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          cover_letter?: string | null
           created_at?: string
+          education?: string | null
+          email?: string | null
+          experience?: string | null
+          full_name?: string | null
           id?: string
           job_id: string
           match_score?: number | null
+          phone?: string | null
+          portfolio_url?: string | null
           resume_id?: string | null
+          skills?: Json
           status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          cover_letter?: string | null
           created_at?: string
+          education?: string | null
+          email?: string | null
+          experience?: string | null
+          full_name?: string | null
           id?: string
           job_id?: string
           match_score?: number | null
+          phone?: string | null
+          portfolio_url?: string | null
           resume_id?: string | null
+          skills?: Json
           status?: string
           updated_at?: string
           user_id?: string
