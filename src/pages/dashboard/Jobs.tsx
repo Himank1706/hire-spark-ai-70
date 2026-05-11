@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Briefcase, Loader2, MapPin, DollarSign, CheckCircle2, AlertTriangle, RefreshCw, Target, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { ApplyJobDialog } from "@/components/ApplyJobDialog";
 
 type Job = {
   id: string;
@@ -25,15 +26,16 @@ type Job = {
   tfidf_similarity: number;
   matched_skills: string[];
   missing_skills: string[];
+  employer_id?: string | null;
 };
 
 const Jobs = () => {
   const { user } = useAuth();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [applying, setApplying] = useState<string | null>(null);
   const [resumeId, setResumeId] = useState<string | null>(null);
   const [needsResume, setNeedsResume] = useState(false);
+  const [applyJob, setApplyJob] = useState<Job | null>(null);
 
   const load = async () => {
     setLoading(true);
