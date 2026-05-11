@@ -128,9 +128,10 @@ export const ApplyJobDialog = ({ job, resumeId, open, onOpenChange, onApplied }:
 
     // Notify employer (best-effort)
     try {
-      if (job.employer_id) {
+      const { data: j } = await supabase.from("jobs").select("employer_id").eq("id", job.id).maybeSingle();
+      if (j?.employer_id) {
         await supabase.from("notifications").insert({
-          user_id: job.employer_id,
+          user_id: j.employer_id,
           type: "applicant",
           title: "New applicant",
           body: `${parsed.data.full_name} applied to ${job.title}${job.match_score != null ? ` (${job.match_score}% match)` : ""}`,
